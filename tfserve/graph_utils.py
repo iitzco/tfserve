@@ -6,6 +6,7 @@ def check_placeholders(graph, tensors):
     ph_names = [p.outputs[0].name for p in ph]
 
     for t in tensors:
+        t = smart_tensor_name(t)
         if t not in ph_names:
             raise ValueError("Input node must be placeholder: {}".format(t))
 
@@ -14,9 +15,7 @@ def check_tensors(graph, tensors):
     for t in tensors:
         try:
             graph.get_tensor_by_name(smart_tensor_name(t))
-        except ValueError:
-            raise ValueError("Non existent tensor in graph: {}".format(t))
-        except KeyError:
+        except (ValueError, KeyError):
             raise ValueError("Non existent tensor in graph: {}".format(t))
 
 
