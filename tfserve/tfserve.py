@@ -1,19 +1,20 @@
-import tensorflow as tf
 import numpy as np
-import os
 from apistar import http, App, Route
 
-from loader import load_model
+from tfserve.loader import load_model
+import tfserve.graph_utils as graph_utils
 
 
 class TFServeApp():
+
     def __init__(self, model_path, in_t, out_t, encode, decode, batch=False):
         self.sess = load_model(model_path)
         self.graph = self.sess.graph
 
-        self.check_tensors(in_t)
-        self.check_tensors(out_t)
-        self.check_placeholders(in_t)
+        self.in_tensors = graph_utils.check_tensors(self.graph, in_t)
+        self.out_tensors = graph_utils.check_tensors(self.graph, out_t)
+
+        graph_utils.check_placeholders(self.graph, in_t)
 
         self.in_t = in_t
         self.out_t = out_t
@@ -33,6 +34,9 @@ class TFServeApp():
         feed_dict = self.encode(request.body)
         if not self.batch:
             feed_dict = {k: np.expand_dims(v, axis=0) for k, v in feed_dict.items()}
+
+        feed_dict = {graph_utils.smart_tensor_name(k): v for k, v in feed_dict.items()}
+
         out_map = {}
         ret = self.sess.run(self.out_t, feed_dict=feed_dict)
         for i, e in enumerate(self.out_t):
