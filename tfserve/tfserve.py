@@ -25,17 +25,19 @@ class TFServeApp():
         self.batch = batch
 
     def run(self, *args, **kwargs):
-        routes = [Route('/', method='POST', handler=self.make_inference)]
+        routes = [Route('/', method='POST', handler=self._make_inference)]
 
         app = App(routes=routes)
         app.serve(*args, **kwargs)
 
-    def make_inference(self, request: http.Request):
+    def _make_inference(self, request: http.Request):
         feed_dict = self.encode(request.body)
         if not self.batch:
             feed_dict = {k: np.expand_dims(v, axis=0) for k, v in feed_dict.items()}
 
         feed_dict = {graph_utils.smart_tensor_name(k): v for k, v in feed_dict.items()}
+
+        graph_utils.check_input(feed_dict.keys(), self.in_t, "Encode function must generate all and only input tensors")
 
         out_map = {}
         ret = self.sess.run(self.out_t, feed_dict=feed_dict)

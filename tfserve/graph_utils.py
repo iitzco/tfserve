@@ -19,14 +19,14 @@ def check_tensors(graph, tensors):
             raise ValueError("Non existent tensor in graph: {}".format(t))
 
 
-def check_input(provided, required):
+def check_input(provided, required, msg):
     for x in provided:
         if x not in required:
-            raise ValueError("Encoded tensor that is not required: {}".format(x))
+            raise ValueError(msg)
 
     for x in required:
         if x not in provided:
-            raise ValueError("Input tensor missing: {}".format(x))
+            raise ValueError(msg)
 
 
 def smart_tensor_name(t):
