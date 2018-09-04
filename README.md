@@ -77,3 +77,9 @@ The graph output will be processed in the `decode` function and the server will 
 * **What if I don't know the tensor names?**
 
 > You can use `tfserve.helper.estimate_io_tensors(model_path)` function to get a list of possible input/output tensor names.
+
+
+## Limitation
+
+> It only works with one-to-one models. That is, models that need to run the graph only once to get the inference.
+> Other architectures of inference will be supported soon. Help is appreciated!
