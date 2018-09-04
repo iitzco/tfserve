@@ -65,7 +65,11 @@ app = TFServeApp(MODEL_PATH, INPUT_TENSORS, OUTPUT_TENSORS, encode, decode)
 app.run('127.0.0.1', 5000, debug=True) # Pass the same arguments as `apistar` run method.
 ```
 
+See `client.py` for full example.
+
 ## How to consume server
+
+![img](imgs/screen.gif)
 
 > The server supports only `POST` method to `/` with the input information as part of the request body.
 
