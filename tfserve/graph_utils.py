@@ -10,6 +10,10 @@ def check_placeholders(graph, tensors):
     """
     Check that tensors are valid graph placeholders.
     """
+
+    if graph is None or tensors is None:
+        raise ValueError("None of the parameters can be None")
+
     ph = [op for op in graph.get_operations() if op.type == "Placeholder"]
     ph_names = [p.outputs[0].name for p in ph]
 
@@ -23,6 +27,10 @@ def check_tensors(graph, tensors):
     """
     Check that tensors are valid graph tensors.
     """
+
+    if graph is None or tensors is None:
+        raise ValueError("None of the parameters can be None")
+
     for t in tensors:
         try:
             graph.get_tensor_by_name(smart_tensor_name(t))
@@ -35,6 +43,9 @@ def check_input(provided, required, msg):
     Check that provided and required set of tensors are equal.
     If not, raises ValueError with msg
     """
+    if provided is None or required is None:
+        raise ValueError("None of the parameters can be None")
+
     for x in provided:
         if x not in required:
             raise ValueError(msg)
