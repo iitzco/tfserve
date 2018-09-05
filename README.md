@@ -14,11 +14,11 @@ $ pip install git+https://github.com/iitzco/tfserve.git
 
 You will need 5 parts:
 
-1. **Model**: it can be a `.pb` file, a `.ckpt` path or a model directory.
+1. **Model**: it can be a `.pb` file or a model directory containing ckpt files.
 2. **Input tensor names**: name of the input tensors of the graph.
 3. **Output tensor names**: name of the output tensors of the graph.
-4. **`encode`**: python function that receives the request body data and outputs a `dict` mapping input tensor names to input values.
-5. **`decode`**: python function that receives a `dict` mapping output tensor names to output values and returns the HTTP response.
+4. **`encode`**: python function that receives the request body data and outputs a `dict` mapping input tensor names to input numpy values.
+5. **`decode`**: python function that receives a `dict` mapping output tensor names to output numpy values and returns the HTTP response.
 
 Follow the example to learn how to combine these parts...
 
@@ -39,7 +39,7 @@ INPUT_TENSORS = ["import/input:0"]
 OUTPUT_TENSORS = ["import/MobilenetV2/Predictions/Softmax:0"]
 
 # 4. encode function: Receives raw jpg image as request data. Returns dict
-#                     with import/input:0 value.
+#                     mappint import/input:0 to numpy value.
 def encode(request_data):
     with tempfile.NamedTemporaryFile(mode="wb", suffix=".jpg") as f:
         f.write(request_data)
@@ -49,8 +49,8 @@ def encode(request_data):
 
     return {INPUT_TENSORS[0]: img}
 
-# 5. decode function: Receives import/MobilenetV2/Predictions/Softmax:0 value
-#                     and builds dict with for json response.
+# 5. decode function: Receives `dict` mapping import/MobilenetV2/Predictions/Softmax:0 to
+#                     numpy value and builds dict with for json response.
 def decode(outputs):
     p = outputs[OUTPUT_TENSORS[0]] # 1001 vector with probabilities for each class.
     index = np.argmax(p)
@@ -81,6 +81,10 @@ The graph output will be processed in the `decode` function and the server will 
 * **What if I don't know the tensor names?**
 
 > You can use `tfserve.helper.estimate_io_tensors(model_path)` function to get a list of possible input/output tensor names.
+
+* **What if I want to run multiple inferences at the same time?**
+
+> You can use `batch=True` when building tfserve.TFServeApp. You will then need to handle the batch dimension yourself in the `encode` and `decode` function.
 
 
 ## Limitation
