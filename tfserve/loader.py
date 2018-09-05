@@ -13,6 +13,12 @@ def load_model(model_path):
 
     :return: tf.Session running the model graph.
     """
+    if model_path is None:
+        raise ValueError("model_path must not be None")
+
+    if not os.path.exists(model_path):
+        raise ValueError("model_path must exist")
+
     if os.path.isfile(model_path) and model_path.endswith(".pb"):
         return _load_pb(model_path)
 
@@ -45,7 +51,8 @@ def _load_ckpt(model_dir):
     """
     graph = tf.Graph()
     sess = tf.Session(graph=graph)
-    ckpt_path = tf.train.latest_checkpoint(model_dir)
-    saver = tf.train.import_meta_graph('{}.meta'.format(ckpt_path))
-    saver.restore(sess, ckpt_path)
-    return sess
+    with graph.as_default():
+        ckpt_path = tf.train.latest_checkpoint(model_dir)
+        saver = tf.train.import_meta_graph('{}.meta'.format(ckpt_path))
+        saver.restore(sess, ckpt_path)
+        return sess
