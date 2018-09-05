@@ -44,8 +44,7 @@ class TFServeApp():
             * encode function mapping request data to input numpy values.
             * decode function mapping output numpy values to request response data.
 
-        :param str model_path: It can be a `.pb` file, `.ckpt` file or directory containing
-                                checkpoint files.
+        :param str model_path: It can be a `.pb` file or directory containing checkpoint files.
         :param list[str] in_t: List of placeholder tensor names. Something like: ["input/image:0"]
         :param list[str] out_t: List of output tensor names. Something like: ["output/Softmax:0"]
         :param encode: python function that receives the request body data and returns a `dict` mapping

@@ -1,3 +1,7 @@
+"""
+Module provinding a function that estimates a model's input/output tensor names.
+"""
+
 from tfserve.loader import load_model
 
 
@@ -6,6 +10,12 @@ out_hints = ["softmax", "sigmoid", "out", "output", "prediction",
 
 
 def estimate_io_tensors(model_path):
+    """
+    Prints estimates input/output tensor names that could be used later
+    with the TFServeApp class to serve the model.
+
+    :param str model_path: can be a '.pb' model file or a checkpoint directory.
+    """
     sess = load_model(model_path)
     graph = sess.graph
 

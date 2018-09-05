@@ -1,8 +1,18 @@
+"""
+Module that handles loading a tensorflow model in several different forms.
+"""
 import os
 import tensorflow as tf
 
 
 def load_model(model_path):
+    """
+    Loads a tensorflow model return a tf.Session running on the loaded model (the graph).
+
+    :param str model_path: It can be a `.pb` file or directory containing checkpoint files.
+
+    :return: tf.Session running the model graph.
+    """
     if os.path.isfile(model_path) and model_path.endswith(".pb"):
         return _load_pb(model_path)
 
@@ -15,6 +25,9 @@ def load_model(model_path):
 
 
 def _load_pb(model_path):
+    """
+    Loads from a '.pb' model file.
+    """
     graph = tf.Graph()
     sess = tf.Session(graph=graph)
     with tf.gfile.FastGFile(model_path, 'rb') as f:
@@ -27,6 +40,9 @@ def _load_pb(model_path):
 
 
 def _load_ckpt(model_dir):
+    """
+    Loads from a checkpoint directory.
+    """
     graph = tf.Graph()
     sess = tf.Session(graph=graph)
     ckpt_path = tf.train.latest_checkpoint(model_dir)
