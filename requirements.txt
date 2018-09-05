@@ -1,3 +1,4 @@
 apistar
 numpy
 tensorflow
+nose
