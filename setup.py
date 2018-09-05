@@ -14,13 +14,14 @@ with open('requirements.txt') as f:
     required = f.read().splitlines()
 
 setup(name='tfserve',
-      version=0.1,
+      version="0.1",
       description='Serve TF models simple and easy as HTTP API.',
-      long_description= readme(),
+      long_description=readme(),
+      long_description_content_type="text/markdown",
       author="Ivan Itzcovich",
       author_email='i.itzcovich@gmail.com',
       url='http://github.com/iitzco/tfserve',
-      keywords='tensorflow deep learning serving',
+      keywords='tensorflow deep-learning serving',
       # scripts=["bin/tfserve"],
       packages=['tfserve'],
       license='MIT',
@@ -40,4 +41,5 @@ setup(name='tfserve',
                    ],
       test_suite='nose.collector',
       tests_require=['nose'],
+      include_package_data=True,
       )
