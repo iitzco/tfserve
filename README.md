@@ -5,10 +5,8 @@ TFServe is a framework designed to serve tensorflow models in a simple and easy 
 ## How to install
 
 ```bash
-$ pip install git+https://github.com/iitzco/tfserve.git
+$ pip install tfserve
 ```
-
-> Soon to be available on `PyPI`.
 
 ## How to use
 
