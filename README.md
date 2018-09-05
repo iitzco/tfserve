@@ -52,8 +52,7 @@ def encode(request_data):
 def decode(outputs):
     p = outputs[OUTPUT_TENSORS[0]] # 1001 vector with probabilities for each class.
     index = np.argmax(p)
-    # Label_map found in https://gist.github.com/yrevar/942d3a0ac09ec9e5eb3a
-    return {"class": LABEL_MAP[index-1], "prob": float(p[index])}
+    return {"class": index_to_class_map[index-1], "prob": float(p[index])}
 ```
 
 That's it! Now create TFServeApp object and run it!
