@@ -1,5 +1,7 @@
 # TFServe
 
+[![Downloads](https://pepy.tech/badge/tfserve)](https://pepy.tech/project/tfserve)
+
 TFServe is a framework designed to serve tensorflow models in a simple and easy way as an HTTP API server. It's built on top of [apistar](https://github.com/encode/apistar).
 
 ## How to install
