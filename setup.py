@@ -14,7 +14,7 @@ with open('requirements.txt') as f:
     required = f.read().splitlines()
 
 setup(name='tfserve',
-      version="0.1.0",
+      version="0.1.1",
       description='Serve TF models simple and easy as an HTTP API server.',
       long_description=readme(),
       long_description_content_type="text/markdown",
