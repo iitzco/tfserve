@@ -48,7 +48,7 @@ class Server(threading.Thread):
             try:
                 self.post("/_ping")
             except URLError as e:
-                if not e.reason.errno == 111: # connection refused
+                if e.reason.errno != 111: # connection refused
                     raise
                 time.sleep(0.5)
             else:
