@@ -42,4 +42,9 @@ setup(name='tfserve',
       test_suite='nose.collector',
       tests_require=['nose'],
       include_package_data=True,
-      )
+      entry_points={
+          'console_scripts': [
+              'tfserve = tfserve.main:main'
+          ]
+      }
+)
