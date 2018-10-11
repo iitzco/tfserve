@@ -1,3 +1,4 @@
 apistar==0.5.41
 numpy
 nose
+Werkzeug

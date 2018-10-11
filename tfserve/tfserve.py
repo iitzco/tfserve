@@ -1,9 +1,27 @@
+import json
+
 import numpy as np
 from apistar import http, App, Route
+
+from werkzeug import routing
+from werkzeug import serving
+from werkzeug.exceptions import BadRequest
+from werkzeug.exceptions import HTTPException
+from werkzeug.exceptions import MethodNotAllowed
+from werkzeug.wrappers import Request, Response
 
 from tfserve.loader import load_model
 import tfserve.graph_utils as graph_utils
 
+
+class BadInput(Exception):
+    """
+    Raised by decode when input is invalid.
+    """
+
+    def __init__(self, description):
+        super(BadInput, self).__init__(description)
+        self.description = description
 
 class TFServeApp():
     """
@@ -105,7 +123,17 @@ class TFServeApp():
         :raises ValueError: if the encoded data provided by the request does not include all
                             the in_t placeholders.
         """
-        feed_dict = self.encode(request.body)
+        return self._make_inference_impl(request.body)
+
+    def _make_inference_impl(self, req_bytes):
+        """
+        Implementation of _make_inference to decouple data interface from HTTP server interface.
+
+        req_bytes must be the unencoded HTTP request body as bytes.
+
+        Returns a Python dict that can be encoded as a JSON HTTP response.
+        """
+        feed_dict = self.encode(req_bytes)
         if not self.batch:
             feed_dict = {k: np.expand_dims(v, axis=0) for k, v in feed_dict.items()}
 
@@ -120,3 +148,76 @@ class TFServeApp():
 
         return self.decode(out_map)
 
+    def run2(self, host, port, middleware=None):
+        """Alternative run implementation.
+
+        `middleware` may be provided as a function to handle
+        requests. If must accept the arguments `(handler, req)` where
+        `handler` is the TFServeApp request handler and `req` is the
+        request.
+
+        """
+        app = self._init_app(middleware)
+        server = serving.make_server(
+            host, port, app, threaded=True,
+            request_handler=serving.WSGIRequestHandler)
+        server.serve_forever()
+
+    def _init_app(self, middleware=None):
+        """Initialize a WSGI application for handling POST to '/'.
+
+        `middleware` may be provided as WSIG middleware.
+
+        """
+        routes = routing.Map([
+            routing.Rule('/', endpoint=self._handle_inference),
+            routing.Rule('/_ping', endpoint=self._handle_ping),
+            routing.Rule('/_shutdown', endpoint=self._handle_shutdown),
+        ])
+        def app(env, start_resp):
+            """WSGI application to handle server requests.
+
+            """
+            urls = routes.bind_to_environ(env)
+            try:
+                handler, _kw = urls.match()
+                req = Request(env)
+                if middleware:
+                    return middleware(handler, req)(env, start_resp)
+                return handler(req)(env, start_resp)
+            except HTTPException as e:
+                return e(env, start_resp)
+        return app
+
+    def _handle_inference(self, req):
+        """Handle inference request.
+
+        """
+        if req.method != 'POST':
+            raise MethodNotAllowed(valid_methods=['POST'])
+        req_bytes = req.stream.read()
+        try:
+            resp_val = self._make_inference_impl(req_bytes)
+        except BadInput as e:
+            raise BadRequest(e.description)
+        return Response(json.dumps(resp_val), content_type='application/json')
+
+    @staticmethod
+    def _handle_ping(_req):
+        """Handles ping request.
+
+        """
+        return Response()
+
+    @staticmethod
+    def _handle_shutdown(req):
+        """Handles shutown request.
+
+        """
+        if req.method != 'POST':
+            raise MethodNotAllowed(valid_methods=['POST'])
+        shutdown = req.environ.get('werkzeug.server.shutdown')
+        if not shutdown:
+            raise BadRequest("server does not support shutdown")
+        shutdown()
+        return Response()
