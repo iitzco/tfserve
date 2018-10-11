@@ -1,4 +1,3 @@
 apistar==0.5.41
 numpy
-tensorflow
 nose
