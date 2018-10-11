@@ -22,7 +22,7 @@ def estimate_io_tensors(model_path):
     print("Possible INPUT tensors:")
     ph = [op.outputs[0] for op in graph.get_operations() if op.type == "Placeholder"]
     for p in ph:
-        print("\t{}".format(p.name))
+        print("\t{}".format(p))
 
     print()
     print("Possible OUTPUT tensors:")
@@ -31,6 +31,6 @@ def estimate_io_tensors(model_path):
     for op in ops:
         if any(x in op.name.lower() for x in out_hints):
             for o in op.outputs:
-                print("\t{}".format(o.name))
+                print("\t{}".format(o))
 
     sess.close()
