@@ -48,7 +48,7 @@ class Server(threading.Thread):
             try:
                 self.post("/_ping")
             except URLError as e:
-                if e.reason.errno != 111: # connection refused
+                if e.reason.errno != errno.ECONNREFUSED:
                     raise
                 time.sleep(0.5)
             else:
@@ -145,7 +145,7 @@ class TestMain():
     def test_empty_request(self):
         """Test an empty request.
 
-        We expect 400 responses with meaningful messages.
+        We expect a 400 response with a meaningful message.
 
         """
         with pytest.raises(HTTPError) as e:
@@ -156,7 +156,7 @@ class TestMain():
     def test_non_json_object(self):
         """Test a non-JSON object input.
 
-        We expect 400 responses with meaningful messages.
+        We expect a 400 response with a meaningful message.
 
         """
         with pytest.raises(HTTPError) as e:
@@ -167,7 +167,7 @@ class TestMain():
     def test_missing_input(self):
         """Test missing input.
 
-        We expect 400 responses with meaningful messages.
+        We expect a 400 response with a meaningful message.
 
         """
         with pytest.raises(HTTPError) as e:
@@ -191,7 +191,7 @@ class TestMain():
             assert outputs[self.out_t] == expected_output
 
     def test_unsupported_examples(self):
-        """Test examples that aren't supported by model.
+        """Test input values that aren't supported by model.
 
         We expect 400 responses with meaningful messages.
 
