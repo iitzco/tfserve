@@ -10,6 +10,16 @@ TFServe is a framework designed to serve tensorflow models in a simple and easy 
 $ pip install tfserve
 ```
 
+After installing `tfserve`, install either `tensorflow` of `tensorflow-gpu` (the latter if you have GPU available).
+
+```bash
+$ pip install tensorflow
+```
+or
+```bash
+$ pip install tensorflow-gpu
+```
+
 ## How to use
 
 You will need 5 parts:
