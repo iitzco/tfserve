@@ -1,5 +1,5 @@
 from PIL import Image
-from labels import label_map
+from labels import LABEL_MAP
 import numpy as np
 import tempfile
 
@@ -38,9 +38,9 @@ def decode(outputs):
     # p will be a 1001 numpy array with all class probabilities.
     index = np.argmax(p)
     # This `dict` will result in a JSON response (courtesy of apistar).
-    return {"class": label_map[index-1], "prob": float(p[index])}
+    return {"class": LABEL_MAP[index-1], "prob": float(p[index])}
 
 
 # Run the server
 app = TFServeApp(MODEL_PATH, INPUT_TENSORS, OUTPUT_TENSORS, encode, decode)
-app.run('127.0.0.1', 5000, debug=True)
+app.run('127.0.0.1', 5000)
