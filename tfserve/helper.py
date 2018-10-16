@@ -19,13 +19,13 @@ def estimate_io_tensors(model_path):
     sess = load_model(model_path)
     graph = sess.graph
 
-    print("Possible INPUT tensors:")
+    print("Possible INPUT tensor names:")
     ph = [op.outputs[0] for op in graph.get_operations() if op.type == "Placeholder"]
     for p in ph:
         print("\t{}".format(p.name))
 
     print()
-    print("Possible OUTPUT tensors:")
+    print("Possible OUTPUT tensor names:")
     ops = [n for n in graph.get_operations()]
 
     for op in ops:
