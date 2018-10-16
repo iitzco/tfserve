@@ -2,7 +2,7 @@
 
 [![Downloads](https://pepy.tech/badge/tfserve)](https://pepy.tech/project/tfserve)
 
-TFServe is a framework designed to serve tensorflow models in a simple and easy way as an HTTP API server. It's built on top of [apistar](https://github.com/encode/apistar).
+TFServe is a framework designed to serve tensorflow models in a simple and easy way as an HTTP API server. It's built on top of [Werkzeug](http://werkzeug.pocoo.org/).
 
 ## How to install
 
@@ -61,7 +61,7 @@ That's it! Now create TFServeApp object and run it!
 
 ```python
 app = TFServeApp(MODEL_PATH, INPUT_TENSORS, OUTPUT_TENSORS, encode, decode)
-app.run('127.0.0.1', 5000, debug=True) # Pass the same arguments as `apistar` run method.
+app.run('127.0.0.1', 5000)  # Host and port where the server will be running
 ```
 
 See `client.py` for full example.
