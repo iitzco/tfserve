@@ -23,6 +23,7 @@ class BadInput(Exception):
         super(BadInput, self).__init__(description)
         self.description = description
 
+
 class TFServeApp():
     """
     This class will handle all server functionality for one-to-one models.
@@ -41,7 +42,7 @@ class TFServeApp():
     app = TFServeApp("logistic_regression_model.pb", ["input:0"], ["sigmoid:0"]
                         lambda x: {"input:0": np.array(x)},
                         lambda y: {"prob": double(y["sigmoid:0"])})
-    app.run("127.0.0.1", 5000, debug=True)
+    app.run("127.0.0.1", 5000)
 
     A web server should be up and running, being POST to / it's only supported method.
     In this request, the model input should be provided as the request body data. This data
@@ -68,8 +69,8 @@ class TFServeApp():
         :param encode: python function that receives the request body data and returns a `dict` mapping
                         in_t to numpy values.
         :param decode: python function that receives a `dict` mapping out_t to numpy values and returns
-                        the response data (for example, a `dict` object that will be transformed to JSON by apistar).
-                        The return object of this method will be the response of apistar framework to the request.
+                        the response data (for example, a `dict` object that will be transformed to JSON).
+                        The return object of this method will be the response to the request.
                         Read it's docs for more information on how to return certain objects (for example, images).
         :param list[str] out_t: List of output tensor names. Something like: ["output/Softmax:0"]
         :param boolean batch: If False, batch dimension (required by tensorflow) will be automatically
@@ -95,22 +96,6 @@ class TFServeApp():
         self.decode = decode
 
         self.batch = batch
-
-    def run(self, *args, **kwargs):
-        """
-        After building the object, this method needs to be called to run the server. This method
-        will build the apistar `app` with the appropiate handlers and will serve it.
-
-        It receives the same parameters as apistar App.serve method. More information here:
-        https://github.com/encode/apistar/blob/master/apistar/server/app.py#L161
-
-        :raises ValueError: if the encoded data provided by the request does not include all
-                            the in_t placeholders.
-        """
-        routes = [Route('/', method='POST', handler=self._make_inference)]
-
-        app = App(routes=routes)
-        app.serve(*args, **kwargs)
 
     def _make_inference(self, request: http.Request):
         """
@@ -139,6 +124,7 @@ class TFServeApp():
 
         feed_dict = {graph_utils.smart_tensor_name(k): v for k, v in feed_dict.items()}
 
+
         graph_utils.check_input(feed_dict.keys(), self.in_t, "Encode function must generate all and only input tensors")
 
         out_map = {}
@@ -148,11 +134,11 @@ class TFServeApp():
 
         return self.decode(out_map)
 
-    def run2(self, host, port, middleware=None):
-        """Alternative run implementation.
+    def run(self, host, port, middleware=None):
+        """Werkzeug run implementation.
 
         `middleware` may be provided as a function to handle
-        requests. If must accept the arguments `(handler, req)` where
+        requests. It must accept the arguments `(handler, req)` where
         `handler` is the TFServeApp request handler and `req` is the
         request.
 
@@ -166,13 +152,13 @@ class TFServeApp():
     def _init_app(self, middleware=None):
         """Initialize a WSGI application for handling POST to '/'.
 
-        `middleware` may be provided as WSIG middleware.
+        `middleware` may be provided as WSGI middleware.
 
         """
         routes = routing.Map([
             routing.Rule('/', endpoint=self._handle_inference),
-            routing.Rule('/_ping', endpoint=self._handle_ping),
-            routing.Rule('/_shutdown', endpoint=self._handle_shutdown),
+            routing.Rule('/ping', endpoint=self._handle_ping),
+            routing.Rule('/shutdown', endpoint=self._handle_shutdown),
         ])
         def app(env, start_resp):
             """WSGI application to handle server requests.
@@ -221,3 +207,22 @@ class TFServeApp():
             raise BadRequest("server does not support shutdown")
         shutdown()
         return Response()
+
+    def run_apistar(self, *args, **kwargs):
+        """
+        LEGACY CODE THAT RUNS UNDER APISTAR
+
+        After building the object, this method needs to be called to run the server. This method
+        will build the apistar `app` with the appropiate handlers and will serve it.
+
+        It receives the same parameters as apistar App.serve method. More information here:
+        https://github.com/encode/apistar/blob/master/apistar/server/app.py#L161
+
+        :raises ValueError: if the encoded data provided by the request does not include all
+                            the in_t placeholders.
+        """
+        routes = [Route('/', method='POST', handler=self._make_inference)]
+
+        app = App(routes=routes)
+        app.serve(*args, **kwargs)
+
