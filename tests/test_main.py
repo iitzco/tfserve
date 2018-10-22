@@ -92,8 +92,8 @@ class Server(threading.Thread):
     def _url(self, path):
         return 'http://%s:%i%s' % (self.args.host, self.args.port, path)
 
-class TestMain():
-    """Tests the main module by starting a server and running tests against it.
+class TestJSON():
+    """Tests main server JSON handler.
     """
 
     model_path = './tests/models/graph.pb'
@@ -127,6 +127,7 @@ class TestMain():
             model=cls.model_path,
             inputs=cls.in_t,
             outputs=cls.out_t,
+            handler='json',
             host='localhost',
             port=port,
             batch=False)
