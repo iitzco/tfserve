@@ -60,7 +60,7 @@ class TestRun():
     @classmethod
     def _encode(cls, req_bytes):
         return {
-            cls.in_t: json.loads(req_bytes)
+            cls.in_t: json.loads(req_bytes.decode('utf-8'))
         }
 
     @classmethod
@@ -78,7 +78,7 @@ class TestRun():
             resp = self.server._handle_inference(req)
             assert resp.status == '200 OK'
             assert resp.headers.get('Content-Type') == 'application/json'
-            decoded = json.loads(b''.join(resp.response))
+            decoded = json.loads(b''.join(resp.response).decode('utf-8'))
             assert decoded == example_out
 
     def test_bad_requests(self):
