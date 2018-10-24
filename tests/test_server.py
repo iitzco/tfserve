@@ -33,6 +33,8 @@ class TestRun():
     in_t = 'import/x:0'
     out_t = 'import/out:0'
 
+    alternative_in_t = 'import/x'
+
     examples = [
         ([1.0, 1.0, 1.0, 1.0, 1.0], 0.2677996287397143),
         ([1.0, 2.0, 3.0, 4.0, 5.0], 0.339625029168856),
@@ -49,7 +51,7 @@ class TestRun():
         """Setup for tests by creating a server.
 
         """
-        cls.server = tfserve.TFServeApp(
+        cls.server_A = tfserve.TFServeApp(
             cls.model_path,
             [cls.in_t],
             [cls.out_t],
@@ -57,10 +59,32 @@ class TestRun():
             cls._decode,
             False)
 
+        cls.server_B = tfserve.TFServeApp(
+            cls.model_path,
+            [cls.alternative_in_t],
+            [cls.out_t],
+            cls._encode,
+            cls._decode,
+            False)
+
+        cls.server_C = tfserve.TFServeApp(
+            cls.model_path,
+            [cls.alternative_in_t],
+            [cls.out_t],
+            cls._alternative_encode,
+            cls._decode,
+            False)
+
     @classmethod
     def _encode(cls, req_bytes):
         return {
             cls.in_t: json.loads(req_bytes.decode('utf-8'))
+        }
+
+    @classmethod
+    def _alternative_encode(cls, req_bytes):
+        return {
+            cls.alternative_in_t: json.loads(req_bytes.decode('utf-8'))
         }
 
     @classmethod
@@ -75,7 +99,21 @@ class TestRun():
         """
         for example_in, example_out in self.examples:
             req = RequestProxy(example_in)
-            resp = self.server._handle_inference(req)
+            resp = self.server_A._handle_inference(req)
+            assert resp.status == '200 OK'
+            assert resp.headers.get('Content-Type') == 'application/json'
+            decoded = json.loads(b''.join(resp.response).decode('utf-8'))
+            assert decoded == example_out
+
+            req = RequestProxy(example_in)
+            resp = self.server_B._handle_inference(req)
+            assert resp.status == '200 OK'
+            assert resp.headers.get('Content-Type') == 'application/json'
+            decoded = json.loads(b''.join(resp.response).decode('utf-8'))
+            assert decoded == example_out
+
+            req = RequestProxy(example_in)
+            resp = self.server_C._handle_inference(req)
             assert resp.status == '200 OK'
             assert resp.headers.get('Content-Type') == 'application/json'
             decoded = json.loads(b''.join(resp.response).decode('utf-8'))
@@ -91,7 +129,7 @@ class TestRun():
         for method in invalid_methods:
             req = RequestProxy(method=method)
             with pytest.raises(MethodNotAllowed):
-                self.server._handle_inference(req)
+                self.server_A._handle_inference(req)
 
     def test_bad_input(self):
         """Test various invalid inputs.
@@ -103,4 +141,4 @@ class TestRun():
         for example_in in self.bad_input:
             req = RequestProxy(example_in)
             with pytest.raises(ValueError):
-                self.server._handle_inference(req)
+                self.server_A._handle_inference(req)

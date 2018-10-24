@@ -84,13 +84,13 @@ class TFServeApp():
         self.sess = load_model(model_path)
         self.graph = self.sess.graph
 
-        graph_utils.check_tensors(self.graph, in_t)
-        graph_utils.check_tensors(self.graph, out_t)
+        self.in_t = [graph_utils.smart_tensor_name(x) for x in in_t]
+        self.out_t = [graph_utils.smart_tensor_name(x) for x in out_t]
 
-        graph_utils.check_placeholders(self.graph, in_t)
+        graph_utils.check_tensors(self.graph, self.in_t)
+        graph_utils.check_tensors(self.graph, self.out_t)
 
-        self.in_t = in_t
-        self.out_t = out_t
+        graph_utils.check_placeholders(self.graph, self.in_t)
 
         self.encode = encode
         self.decode = decode
@@ -123,7 +123,6 @@ class TFServeApp():
             feed_dict = {k: np.expand_dims(v, axis=0) for k, v in feed_dict.items()}
 
         feed_dict = {graph_utils.smart_tensor_name(k): v for k, v in feed_dict.items()}
-
 
         graph_utils.check_input(feed_dict.keys(), self.in_t, "Encode function must generate all and only input tensors")
 
