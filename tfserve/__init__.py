@@ -22,3 +22,4 @@ _check_tensorflow()
 
 from tfserve.tfserve import TFServeApp
 from tfserve.tfserve import BadInput
+from tfserve.handler import EncodeDecodeHandler
