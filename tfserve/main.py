@@ -16,19 +16,28 @@ DEFAULT_HANDLER = 'json'
 DEFAULT_HOST = '0.0.0.0'
 DEFAULT_PORT = 5000
 
-HELP = """
-Serve a TensorFlow model.
+DESCRIPTION = """
 
-HANDLERS
+TFServe
+-------
+
+Serve TF models simple and easy as an HTTP API
+
+"""
+
+
+EPILOG = """
+
+ABOUT HANDLERS
 
   Processing of HTTP requests and responses are handled according
   to the --handler argument.
 
-  The following handlers are supported by TFServe:
+  The following handlers are currently supported by TFServe:
 
     json  Requests handled as JSON model inputs.
 
-  You may alternative specif a Python module name for
+  You may alternative specify a Python module name for
   --handler. See CUSTOM HANDLERS below for details.
 
   * JSON HANDLER: Inputs are submitted to the root path '/'
@@ -50,13 +59,17 @@ HANDLERS
                  inputs as batches rather than as single inputs.
 
 
-BATCH MODE
-
-  To run in batch mode, use --batch.
-
 MODEL HELP
 
   For help with model input and output tensors, use --help-model.
+
+  Note that in order to use the --help-model you will need to provide the
+  model path with the `-m` or `--model` argument.
+
+
+ABOUT TFSERVE
+
+For more information, issues or suggestions, go to https://github.com/iitzco/tfserve
 
 """
 
@@ -72,7 +85,8 @@ def main():
 
 def _init_args(require_tensors):
     p = argparse.ArgumentParser(
-        description=HELP,
+        description=DESCRIPTION,
+        epilog=EPILOG,
         formatter_class=argparse.RawTextHelpFormatter,
         add_help=False)
     p.add_argument(
