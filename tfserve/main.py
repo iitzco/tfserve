@@ -147,8 +147,8 @@ def _split_tensors(tensors):
 
 def _init_handler(inputs, outputs, args):
     possible_handler_modules = [
-        args.handler,
         'tfserve.%s_handler' % args.handler,
+        args.handler,
     ]
     for mod_name in possible_handler_modules:
         try:
